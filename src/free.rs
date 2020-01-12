@@ -201,6 +201,8 @@ pub fn min<I>(iterable: I) -> Option<I::Item>
 ///
 /// `IntoIterator` enabled version of `iterable.join(sep)`.
 ///
+/// If `IntoIterator::Item` implements `AsRef<str>`, use `join_str` instead.
+///
 /// ```
 /// use itertools::join;
 ///
@@ -212,6 +214,25 @@ pub fn join<I>(iterable: I, sep: &str) -> String
           I::Item: Display
 {
     iterable.into_iter().join(sep)
+}
+
+/// Combine all iterator elements into one String, seperated by `sep`.
+/// Faster than `join` for `AsRef<str>` items.
+///
+/// `IntoIterator` enabled version of `iterable.join_str(sep)`.
+///
+/// ```
+/// use itertools::join_str;
+///
+/// assert_eq!(join_str(&["foo", "bar", "baz"], ", "), "foo, bar, baz");
+/// ```
+#[cfg(feature = "use_std")]
+pub fn join_str<I>(iterable: I, sep: &str) -> String
+where
+    I: IntoIterator,
+    I::Item: AsRef<str>,
+{
+    iterable.into_iter().join_str(sep)
 }
 
 /// Sort all iterator elements into a new iterator in ascending order.
