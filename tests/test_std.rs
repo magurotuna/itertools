@@ -285,6 +285,17 @@ fn join() {
 }
 
 #[test]
+fn join_str() {
+    let many = ["foo", "bar", "baz"];
+    let one = ["foo"];
+    let none: Vec<String> = vec![];
+
+    assert_eq!(many.iter().join(", "), "foo, bar, baz");
+    assert_eq!(one.iter().join(", "), "foo");
+    assert_eq!(none.iter().join(", "), "");
+}
+
+#[test]
 fn sorted_by() {
     let sc = [3, 4, 1, 2].iter().cloned().sorted_by(|&a, &b| {
         a.cmp(&b)

@@ -1611,6 +1611,9 @@ pub trait Itertools : Iterator {
     ///
     /// Use the `Display` implementation of each element.
     ///
+    /// If each element implements `AsRef<str>` trait, it's recommended to use
+    /// `join_str` instead because of performance.
+    ///
     /// ```
     /// use itertools::Itertools;
     ///
@@ -1631,6 +1634,36 @@ pub trait Itertools : Iterator {
                 for elt in self {
                     result.push_str(sep);
                     write!(&mut result, "{}", elt).unwrap();
+                }
+                result
+            }
+        }
+    }
+
+    /// Combine all iterator elements into one String, separated by `sep`.
+    ///
+    /// This is faster than `join`, but each element of the iterator must implement `AsRef<str>` trait.
+    ///
+    /// ```
+    /// use itertools::Itertools;
+    ///
+    /// assert_eq!(["foo", "bar", "baz"].iter().join_str(", "), "foo, bar, baz");
+    /// assert_eq!(["foo".to_string(), "bar".to_string()].iter().join_str(", "), "foo, bar");
+    /// ```
+    #[cfg(feature = "use_std")]
+    fn join_str(&mut self, sep: &str) -> String
+    where
+        Self::Item: AsRef<str>,
+    {
+        match self.next() {
+            None => String::new(),
+            Some(first_elt) => {
+                let (lower, _) = self.size_hint();
+                let mut result = String::with_capacity(sep.len() * lower);
+                result.push_str(first_elt.as_ref());
+                for elt in self {
+                    result.push_str(sep);
+                    result.push_str(elt.as_ref());
                 }
                 result
             }
